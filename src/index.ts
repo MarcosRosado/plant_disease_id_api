@@ -26,7 +26,6 @@ app.post('/analyse', upload.single('image'), async (req: Request, res: Response)
     const snapshot = await db.collection('diseases').doc('disease1').get();
     const data = snapshot.data();
     if (data) {
-      console.log(data);
       res.status(200).json({
         "diseaseName": data.diseaseName,
         "description": data.description,
