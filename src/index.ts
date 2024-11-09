@@ -11,12 +11,10 @@ const app = express();
 const port = 3030;
 
 tf.loadLayersModel(modelPath).then(loadedModel => {
-  // Check if the model has an input layer with the correct shape
-  if (!loadedModel.inputs[0].shape) {
-    throw new Error('Model input layer is not defined correctly');
-  }
   model = loadedModel;
   console.log('Model loaded successfully');
+}).catch(err => {
+  console.error('Failed to load model:', err);
 });
 
 admin.initializeApp({
