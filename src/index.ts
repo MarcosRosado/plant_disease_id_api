@@ -4,7 +4,7 @@ import multer from 'multer';
 import * as tf from '@tensorflow/tfjs-node';
 // @ts-ignore
 import serviceAccount from './key/plant-analysis-key.json';
-const modelPath = 'file://./src/model/model.json';
+const modelPath = 'file://./src/model/modelo_doencas_tomate.h5';
 let model: tf.LayersModel;
 
 const app = express();
@@ -63,7 +63,7 @@ app.post('/analyse', upload.single('image'), async (req: Request, res: Response)
       res.status(404).send('Disease not found');
     }
   } catch (error) {
-
+    console.log(error);
     res.status(500).send(error);
   }
 });
