@@ -28,6 +28,12 @@
                 128,
                 3
               ],
+              "input_shape": [
+                null,
+                128,
+                128,
+                3
+              ],
               "dtype": "float32",
               "sparse": false,
               "name": "input_layer"
