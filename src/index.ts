@@ -4,7 +4,7 @@ import multer from 'multer';
 import * as tf from '@tensorflow/tfjs-node';
 // @ts-ignore
 import serviceAccount from './key/plant-analysis-key.json';
-const modelPath = 'file://./model/modelo_doencas_tomate/model.json';
+const modelPath = 'file://./model/model.json';
 let model: tf.LayersModel;
 
 const app = express();
