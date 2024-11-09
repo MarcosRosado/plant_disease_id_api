@@ -1,11 +1,19 @@
 import express, { Request, Response } from 'express';
 import admin from 'firebase-admin';
 import multer from 'multer';
+import * as tf from '@tensorflow/tfjs-node';
 // @ts-ignore
 import serviceAccount from './key/plant-analysis-key.json';
+const modelPath = './model/modelo_doencas_tomate.h5';
+let model: tf.LayersModel;
 
 const app = express();
 const port = 3030;
+
+tf.loadLayersModel(modelPath).then(loadedModel => {
+  model = loadedModel;
+  console.log('Model loaded successfully');
+});
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -21,10 +29,29 @@ app.post('/analyse', upload.single('image'), async (req: Request, res: Response)
       return res.status(400).send('No file uploaded');
     }
     const file = req.file;
-    console.log(file);
+    // Convert image buffer to tensor
+    const imageBuffer = file.buffer;
+    const imageTensor = tf.node.decodeImage(imageBuffer);
+    const resizedImage = tf.image.resizeBilinear(imageTensor, [224, 224]);
+    const normalizedImage = resizedImage.div(tf.scalar(255));
+    const batchedImage = normalizedImage.expandDims(0);
+
+    // Run the model on the image tensor
+    const predictions = model.predict(batchedImage) as tf.Tensor;
+    const predictionArray = predictions.arraySync();
+
+    // Clear the buffer holding the image data
+    imageTensor.dispose();
+    resizedImage.dispose();
+    normalizedImage.dispose();
+    batchedImage.dispose();
+    predictions.dispose();
+
+    console.log(predictionArray);
 
     const snapshot = await db.collection('diseases').doc('disease1').get();
     const data = snapshot.data();
+
     if (data) {
       res.status(200).json({
         "diseaseName": data.diseaseName,
