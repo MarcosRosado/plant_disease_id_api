@@ -30,9 +30,9 @@
               ],
               "input_shape": [
                 null,
-                32,
-                32,
-                1
+                256,
+                256,
+                3
               ],
               "dtype": "float32",
               "sparse": false,
