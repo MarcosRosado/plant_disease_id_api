@@ -73,7 +73,7 @@ app.post('/analyse', upload.single('image'), async (req: Request, res: Response)
         "diseaseName": data.diseaseName,
         "description": data.description,
         "diseaseSolution": data.diseaseSolution,
-        "analysisConfidence": maxPrediction.toString()
+        "analysisConfidence": (maxPrediction * 100).toFixed(2).toString() + '%'
       });
     } else {
       res.status(404).send('Disease not found');
