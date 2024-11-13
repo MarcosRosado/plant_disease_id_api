@@ -34,7 +34,7 @@ app.post('/analyse', upload.single('image'), async (req: Request, res: Response)
     // Convert image buffer to tensor
     const imageBuffer = file.buffer;
     const imageTensor = tf.node.decodeImage(imageBuffer);
-    const resizedImage = tf.image.resizeBilinear(imageTensor, [224, 224]);
+    const resizedImage = tf.image.resizeBilinear(imageTensor, [128, 128]);
     const normalizedImage = resizedImage.div(tf.scalar(255));
     const batchedImage = normalizedImage.expandDims(0);
 
