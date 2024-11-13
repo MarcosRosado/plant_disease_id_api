@@ -10,6 +10,15 @@ let model: tf.LayersModel;
 const app = express();
 const port = 3030;
 
+const labels =[
+  "mofoBranco",
+  "murchaBacteriana",
+  "oidio",
+  "requeima",
+  "saudavel",
+  "septoriose",
+]
+
 tf.loadLayersModel(modelPath).then(loadedModel => {
   model = loadedModel;
   console.log('Model loaded successfully');
@@ -41,6 +50,11 @@ app.post('/analyse', upload.single('image'), async (req: Request, res: Response)
     // Run the model on the image tensor
     const predictions = model.predict(batchedImage) as tf.Tensor;
     const predictionArray = predictions.arraySync();
+    // @ts-ignore
+    const maxPredictionIndex = predictionArray[0].indexOf(Math.max(...predictionArray[0]));
+    // @ts-ignore
+    const maxPrediction = predictionArray[0][maxPredictionIndex];
+    const diseaseName = labels[maxPredictionIndex];
 
     // Clear the buffer holding the image data
     imageTensor.dispose();
@@ -51,7 +65,7 @@ app.post('/analyse', upload.single('image'), async (req: Request, res: Response)
 
     console.log(predictionArray);
 
-    const snapshot = await db.collection('diseases').doc('disease1').get();
+    const snapshot = await db.collection('diseases').doc(diseaseName).get();
     const data = snapshot.data();
 
     if (data) {
@@ -59,7 +73,7 @@ app.post('/analyse', upload.single('image'), async (req: Request, res: Response)
         "diseaseName": data.diseaseName,
         "description": data.description,
         "diseaseSolution": data.diseaseSolution,
-        "analysisConfidence": "82.6"
+        "analysisConfidence": maxPrediction.toString()
       });
     } else {
       res.status(404).send('Disease not found');
