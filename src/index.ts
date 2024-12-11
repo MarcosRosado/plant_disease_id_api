@@ -4,8 +4,6 @@ import multer from 'multer';
 import * as tf from '@tensorflow/tfjs-node';
 // @ts-ignore
 import serviceAccount from './key/plant-analysis-key.json';
-const modelPath = 'file://./src/model/model.json';
-let model: tf.LayersModel;
 
 const app = express();
 const port = 3030;
@@ -19,12 +17,17 @@ const labels =[
   "septoriose",
 ]
 
+// Load the model from the file system
+const modelPath = 'file://./src/model/model.json';
+// load the layers model from the json file, and assign it to the model variable
+let model: tf.LayersModel;
 tf.loadLayersModel(modelPath).then(loadedModel => {
   model = loadedModel;
   console.log('Model loaded successfully');
 }).catch(err => {
   console.error('Failed to load model:', err);
 });
+
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -46,9 +49,10 @@ app.post('/analyse', upload.single('image'), async (req: Request, res: Response)
     const resizedImage = tf.image.resizeBilinear(imageTensor, [128, 128]);
     const normalizedImage = resizedImage.div(tf.scalar(255));
     const batchedImage = normalizedImage.expandDims(0);
-
     // Run the model on the image tensor
     const predictions = model.predict(batchedImage) as tf.Tensor;
+
+
     const predictionArray = predictions.arraySync();
     // @ts-ignore
     const maxPredictionIndex = predictionArray[0].indexOf(Math.max(...predictionArray[0]));
